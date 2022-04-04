@@ -14,7 +14,7 @@ def enableVideo():
         if k!= -1:
             break
     
-    cv2.imwrite('/home/pi/test.jpg', image)
+    #cv2.imwrite('/home/pi/test.jpg', image)
     cam.release()
     cv2.destroyAllWindows()
 
