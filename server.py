@@ -31,7 +31,7 @@ while True:
  if client_socket:
   vid = cv2.VideoCapture(0)
   
-  while(vid.isOpened()):
+  while(vid.isOpened()): 
    ret,image = vid.read()
    img_serialize = pickle.dumps(image)
    message = struct.pack("Q",len(img_serialize))+img_serialize
