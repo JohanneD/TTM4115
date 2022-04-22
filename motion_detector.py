@@ -22,7 +22,7 @@ class Detector:
         # otherwise, we are reading from a video file
         else:
             vs = cv2.VideoCapture(args["video"])
-
+            
         # initialize the first frame in the video stream
         firstFrame = None
 
@@ -97,3 +97,4 @@ class Detector:
         # cleanup the camera and close any open windows
         vs.stop() if args.get("video", None) is None else vs.release()
         cv2.destroyAllWindows()
+        

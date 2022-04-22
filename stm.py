@@ -1,50 +1,75 @@
 from stmpy import Driver, Machine
 from threading import Thread
 
+import keyboard
 import paho.mqtt.client as mqtt
 import cv2
 import motion_detector
 from six.moves import input
+from pynput.keyboard import Key, Controller
 
 class Video_Session:
+    
+    
     def on_init(self):
         print("starting...")
         #motion = motion_detector.Detector()
     
     def motion_detection(self):
-        motion = motion_detector.Detector() 
+        global motion
+        motion = motion_detector.Detector()
         detect = motion.detect_motion()
         if detect:
-            self.session_option()
-            self.start_timer(10)
+            #self.session_option()
+            #self.start_timer(10)
+            self.stm.send('detect')
     
     #both session option and start timer is called when motion is detected.
     def session_option(self):
         #request participation from both users, might need to change this to accepting only one user and not needing both users
         #cam.release()
         #cv2.destroyAllWindows()
-        
         print("do you want to join session? (Y/N): ")
         while True:
             key = cv2.waitKey(1) & 0xFF
             if key == ord("y"):
                 myclient.send("request_session")
-                cv2.destroyAllWindows()
-                self.start_session()
+                self.stm.send('join')
                 break
-            #elif key == ord("n"):
-              #  print("No")
-               # break
+            elif key == ord("n"):
+                print("No")
+                self.stm.send('decline')
+                break
+    def stop_video(self):
+        keyboard = Controller()
+        keyboard.press('q')
+        keyboard.release('q')
             
-        
-    def start_timer(self, t):
+    def request_wait(self):
+        print("waiting for other party to join")
+        print("join session? (Y/N): ")
+        while True:
+            try:
+                if keyboard.read_key == 'y':
+                    print('accepted')
+                    myclient.send("accepted")
+                    self.stm.send('accept_request')
+           
+                elif keyboard.read_key == 'n':
+                    print("decline")
+                    self.stm.send('decline')
+                    break
+            except:
+                break
+                
+    #def start_timer(self, t):
         #starts timer
-        print("start timer")
+        #print("start timer")
         
         
     #if yes on session_option then call start_session  
     def start_session(self):
-        #starts the video stream
+        #starte the google meeting
         print("staring session...")
         
         cam = cv2.VideoCapture(-1, cv2.CAP_V4L)
@@ -178,6 +203,27 @@ t12 = {
     "effect": "display",
 }
 
+t13 = {
+    "trigger": "request",
+    "source": "idle",
+    "target": "requesting",
+    "effect": "stop_video; request_wait",
+}
+
+t14 = {
+    "trigger": "accept_request",
+    "source": "requesting",
+    "target": "active",
+    "effect": "start_session",
+    }
+
+t15 = {
+    "trigger": "decline_request",
+    "source": "requesting",
+    "target": "idle",
+    "effect": "stop_session",
+    }
+
 
 class MQTT_client:
     
@@ -191,22 +237,21 @@ class MQTT_client:
         print("on_connect(): {}".format(mqtt.connack_string(rc)))
 
     def on_message(self, client, userdata, msg):
-        if msg.topic == "ttm4115/3/comms":
+        if msg.topic == "ttm4115/3/comms/client1":
             print(f"on_message(): topic: {msg.topic}:{str(msg.payload)}")
         
         #self.stm_driver.send("message", "tick_tock")
-        if str(msg.payload.decode("utf-8")) == "startVideo":
-            print("testing hi")
-            video.start_session()
-        elif str(msg.payload.decode("utf-8")) == "request_session":
-            print("Session has been requested")
+            if str(msg.payload.decode("utf-8")) == "request_session":
+                print("session requested")
+                video.stop_video()
+                video.stm.send("request")
             
             
     def start(self, broker, port):
         print("Connecting to {}:{}".format(broker, port))
         self.client.connect(broker, port)
 
-        self.client.subscribe("ttm4115/3/comms")
+        self.client.subscribe("ttm4115/3/comms/client1")
 
         try:
             # line below should not have the () after the function!
@@ -217,13 +262,13 @@ class MQTT_client:
             self.client.disconnect()
             
     def send(self, message):
-        self.client.publish("ttm4115/3/comms", message)
+        self.client.publish("ttm4115/3/comms/client2", message)
 
 
 broker, port = "mqtt.item.ntnu.no", 1883
 
 video = Video_Session()
-video_chat_machine = Machine(transitions=[t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12], obj=video, name="video_chat")
+video_chat_machine = Machine(transitions=[t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15], obj=video, name="video_chat")
 video.stm = video_chat_machine
 
 driver = Driver()
