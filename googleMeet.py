@@ -62,6 +62,7 @@ def AskToJoin():
 # assign email id and password
 mail_address = 'officeonettm4115@gmail.com'
 password = 'TTM4115-komsys'
+meeting_adress = 'https://meet.google.com/puu-hizz-xpx?pli=1'
  
 # create chrome instance
 opt = Options()
@@ -79,11 +80,13 @@ driver = webdriver.Chrome(options=opt)
 Glogin(mail_address, password)
  
 # go to google meet
-driver.get('https://meet.google.com/puu-hizz-xpx')
+driver.get(meeting_adress)
 #turnOffMicCam()
 # AskToJoin()
 joinNow()
 
 while True:
-    if driver.current_url != 'https://meet.google.com/puu-hizz-xpx':
+    time.sleep(2)
+    print(driver.current_url)
+    if driver.current_url != meeting_adress:
         driver.quit()
