@@ -28,9 +28,13 @@ class Video_Session:
         while True:
             key = cv2.waitKey(1) & 0xFF
             if key == ord("y"):
+                myclient.send("request_session")
                 cv2.destroyAllWindows()
                 self.start_session()
                 break
+            #elif key == ord("n"):
+              #  print("No")
+               # break
             
         
     def start_timer(self, t):
@@ -82,9 +86,6 @@ class Video_Session:
         #close the leaderboard
         print("closing leaderboard")
         
-    
-        
-    
 
 
 # initial transition
@@ -179,6 +180,7 @@ t12 = {
 
 
 class MQTT_client:
+    
     def __init__(self):
         self.count = 0
         self.client = mqtt.Client()
@@ -189,19 +191,22 @@ class MQTT_client:
         print("on_connect(): {}".format(mqtt.connack_string(rc)))
 
     def on_message(self, client, userdata, msg):
-        if msg.topic == "ttm4115/3/test":
+        if msg.topic == "ttm4115/3/comms":
             print(f"on_message(): topic: {msg.topic}:{str(msg.payload)}")
         
         #self.stm_driver.send("message", "tick_tock")
         if str(msg.payload.decode("utf-8")) == "startVideo":
             print("testing hi")
             video.start_session()
+        elif str(msg.payload.decode("utf-8")) == "request_session":
+            print("Session has been requested")
+            
             
     def start(self, broker, port):
         print("Connecting to {}:{}".format(broker, port))
         self.client.connect(broker, port)
 
-        self.client.subscribe("ttm4115/3/test")
+        self.client.subscribe("ttm4115/3/comms")
 
         try:
             # line below should not have the () after the function!
@@ -210,6 +215,9 @@ class MQTT_client:
         except KeyboardInterrupt:
             print("Interrupted")
             self.client.disconnect()
+            
+    def send(self, message):
+        self.client.publish("ttm4115/3/comms", message)
 
 
 broker, port = "mqtt.item.ntnu.no", 1883
