@@ -1,7 +1,10 @@
+# import required modules
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 import time
-
+ 
+ 
 def Glogin(mail_address, password):
     # Login Page
     driver.get(
@@ -10,31 +13,31 @@ def Glogin(mail_address, password):
     # input Gmail
     driver.find_element_by_id("identifierId").send_keys(mail_address)
     driver.find_element_by_id("identifierNext").click()
-    driver.implicitly_wait(1000)
+    driver.implicitly_wait(10)
  
     # input Password
     driver.find_element_by_xpath(
         '//*[@id="password"]/div[1]/div/div[1]/input').send_keys(password)
-    driver.implicitly_wait(2000)
+    driver.implicitly_wait(10)
     driver.find_element_by_id("passwordNext").click()
-    driver.implicitly_wait(2000)
+    driver.implicitly_wait(10)
  
     # go to google home page
     driver.get('https://google.com/')
-    driver.implicitly_wait(1000)
+    driver.implicitly_wait(100)
  
  
 def turnOffMicCam():
     # turn off Microphone
     time.sleep(2)
     driver.find_element_by_xpath(
-        '//*[@id="yDmH0d"]/c-wiz/div/div/div[8]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]/div/div[4]/div[1]/div/div/div').click()
+        '//*[@id="yDmH0d"]/div/div/c-wiz/div/div/div[8]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]/div/div[4]/div[1]/div/div/div').click()
     driver.implicitly_wait(3000)
  
     # turn off camera
     time.sleep(1)
     driver.find_element_by_xpath(
-        '//*[@id="yDmH0d"]/c-wiz/div/div/div[8]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]/div/div[4]/div[2]/div/div').click()
+        '//*[@id="yDmH0d"]/div/div/c-wiz/div/div/div[8]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]/div/div[4]/div[2]/div/div').click()
     driver.implicitly_wait(3000)
  
  
@@ -42,9 +45,8 @@ def joinNow():
     # Join meet
     print(1)
     time.sleep(5)
-    driver.implicitly_wait(2000)
-    driver.find_element_by_css_selector(
-        'div.uArJ5e.UQuaGc.Y5sE8d.uyXBBb.xKiqt').click()
+    driver.implicitly_wait(2)
+    driver.find_element_by_xpath("/html/body/div[1]/c-wiz/div/div/div[9]/div[3]/div/div[1]/div[3]/div/div/div[2]/div/div[2]/div/div[1]/div/button").click()
     print(1)
  
  
@@ -58,7 +60,7 @@ def AskToJoin():
  
  
 # assign email id and password
-mail_address = 'officeoneTTM4115@gmail.com'
+mail_address = 'officeonettm4115@gmail.com'
 password = 'TTM4115-komsys'
  
 # create chrome instance
@@ -77,7 +79,11 @@ driver = webdriver.Chrome(options=opt)
 Glogin(mail_address, password)
  
 # go to google meet
-driver.get('https://meet.google.com/xby-zehb-ncf')
-turnOffMicCam()
+driver.get('https://meet.google.com/puu-hizz-xpx')
+#turnOffMicCam()
 # AskToJoin()
 joinNow()
+
+while True:
+    if driver.current_url != 'https://meet.google.com/puu-hizz-xpx':
+        driver.quit()
