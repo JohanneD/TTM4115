@@ -3,23 +3,60 @@ from threading import Thread
 
 import paho.mqtt.client as mqtt
 import cv2
+import motion_detector
+from six.moves import input
 
 class Video_Session:
     def on_init(self):
         print("starting...")
+        #motion = motion_detector.Detector()
     
+    def motion_detection(self):
+        motion = motion_detector.Detector() 
+        detect = motion.detect_motion()
+        if detect:
+            self.session_option()
+            self.start_timer(10)
+    
+    #both session option and start timer is called when motion is detected.
     def session_option(self):
         #request participation from both users, might need to change this to accepting only one user and not needing both users
-        print("check if want to join")
+        #cam.release()
+        #cv2.destroyAllWindows()
+        
+        print("do you want to join session? (Y/N): ")
+        while True:
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord("y"):
+                cv2.destroyAllWindows()
+                self.start_session()
+                break
+            
         
     def start_timer(self, t):
         #starts timer
         print("start timer")
-    
+        
+        
+    #if yes on session_option then call start_session  
     def start_session(self):
         #starts the video stream
-        print("start video")
+        print("staring session...")
+        
+        cam = cv2.VideoCapture(-1, cv2.CAP_V4L)
+
+        while True:
+            ret, image = cam.read()
+            cv2.imshow('test', image)
+            k=cv2.waitKey(1)
+            if k!= -1:
+                break
+            
+        cv2.imwrite('/home/pi/test.jpg', image)
+        cam.release()
+        cv2.destroyAllWindows()
     
+    #call motion_detection when stopping the session. 
     def stop_session(self):
         #stops the video stream
         print("stop video")
@@ -28,6 +65,15 @@ class Video_Session:
         #ask if user wants to play game, need both parties to accept the game request.
         print("check if user want ot play game")
     
+    #if yes from both users then call the start game option
+    def start_game(self):
+        print("you are playing cool game :O")
+        
+    def stop_game(self):
+        #stops the game
+        print("stoping game...")
+    
+    #do not need to diplay a actual leaderboard if we do not have time to implement it.
     def display(self):
         #displays the leaderboard on screen
         print("displaying..")
@@ -36,12 +82,7 @@ class Video_Session:
         #close the leaderboard
         print("closing leaderboard")
         
-    def start_game(self):
-        print("you are playing cool game :O")
-        
-    def stop_game(self):
-        #stops the game
-        print("stoping game...")
+    
         
     
 
@@ -49,7 +90,7 @@ class Video_Session:
 # initial transition
 t0 = {"source": "initial",
       "target": "idle",
-      "effect": "on_init"}
+      "effect": "on_init; motion_detection"}
 
 #The session_option function ask the user if it wants to join a session
 t1 = {
@@ -154,10 +195,9 @@ class MQTT_client:
         #self.stm_driver.send("message", "tick_tock")
         if str(msg.payload.decode("utf-8")) == "startVideo":
             print("testing hi")
-            enableVideo()
+            video.start_session()
             
-     def start(self, broker, port):
-
+    def start(self, broker, port):
         print("Connecting to {}:{}".format(broker, port))
         self.client.connect(broker, port)
 

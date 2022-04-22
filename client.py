@@ -12,7 +12,7 @@ os.system("tput setaf 3")
 print(a)
 import socket,cv2, pickle,struct# create socket
 client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)#  server ip address here
-host_ip = '10.22.67.185' 
+host_ip = '129.241.208.100' 
 port = 9999
 client_socket.connect((host_ip,port)) 
 data = b""
