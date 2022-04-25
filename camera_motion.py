@@ -6,22 +6,27 @@ import imutils
 import time
 import cv2
 
+
 class Detector:
+    
+    vs = VideoStream(src=0).start()
+    args = None
+    
     def detect_motion(self):
         # construct the argument parser and parse the arguments
         ap = argparse.ArgumentParser()
         ap.add_argument("-v", "--video", help="path to the video file")
         ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
-        args = vars(ap.parse_args())
+        self.args = vars(ap.parse_args())
 
         # if the video argument is None, then we are reading from webcam
-        if args.get("video", None) is None:
-            vs = VideoStream(src=0).start()
-            time.sleep(2.0)
+        #if self.args.get("video", None) is None:
+        
+        time.sleep(2.0)
 
         # otherwise, we are reading from a video file
-        else:
-            vs = cv2.VideoCapture(args["video"])
+        #else:
+            #self.vs = cv2.VideoCapture(args["video"])
             
         # initialize the first frame in the video stream
         firstFrame = None
@@ -30,8 +35,8 @@ class Detector:
         while True:
             # grab the current frame and initialize the occupied/unoccupied
             # text
-            frame = vs.read()
-            frame = frame if args.get("video", None) is None else frame[1]
+            frame = self.vs.read()
+            frame = frame if self.args.get("video", None) is None else frame[1]
             text = "Unoccupied"
 
             # if the frame could not be grabbed, then we have reached the end
@@ -64,7 +69,7 @@ class Detector:
             # loop over the contours
             for c in cnts:
                 # if the contour is too small, ignore it
-                if cv2.contourArea(c) < args["min_area"]:
+                if cv2.contourArea(c) < self.args["min_area"]:
                     continue
                 
                 # compute the bounding box for the contour, draw it on the frame,
@@ -87,14 +92,20 @@ class Detector:
             
             if text == "Occupied":
                 print("motion detected!!")
-                vs.stop() if args.get("video", None) is None else vs.release()
+                self.vs.stream.release()
                 return True
 
             # if the `q` key is pressed, break from the lop
             if key == ord("q"):
                 break
             
+            
         # cleanup the camera and close any open windows
-        vs.stop() if args.get("video", None) is None else vs.release()
+        self.vs.stream.release()
+        cv2.destroyAllWindows()
+        
+        
+    def stop_motion(self):
+        self.vs.stream.release()
         cv2.destroyAllWindows()
         

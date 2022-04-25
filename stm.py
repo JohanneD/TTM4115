@@ -4,21 +4,23 @@ from threading import Thread
 import keyboard
 import paho.mqtt.client as mqtt
 import cv2
-import motion_detector
+import camera_motion as camera
 from six.moves import input
 from pynput.keyboard import Key, Controller
 
 class Video_Session:
-    
+    motion = camera.Detector()
     
     def on_init(self):
         print("starting...")
         #motion = motion_detector.Detector()
+        
+    def get_motion(self):
+        return self.motion.stop_motion()
     
     def motion_detection(self):
-        global motion
-        motion = motion_detector.Detector()
-        detect = motion.detect_motion()
+        
+        detect = self.motion.detect_motion()
         if detect:
             #self.session_option()
             #self.start_timer(10)
@@ -40,11 +42,13 @@ class Video_Session:
                 print("No")
                 self.stm.send('decline')
                 break
+    """         
     def stop_video(self):
         keyboard = Controller()
         keyboard.press('q')
         keyboard.release('q')
-            
+    """
+   
     def request_wait(self):
         print("waiting for other party to join")
         print("join session? (Y/N): ")
@@ -207,7 +211,7 @@ t13 = {
     "trigger": "request",
     "source": "idle",
     "target": "requesting",
-    "effect": "stop_video; request_wait",
+    "effect": "request_wait",
 }
 
 t14 = {
@@ -224,8 +228,8 @@ t15 = {
     "effect": "stop_session",
     }
 
-
 class MQTT_client:
+    motionStatus = True
     
     def __init__(self):
         self.count = 0
@@ -243,10 +247,16 @@ class MQTT_client:
         #self.stm_driver.send("message", "tick_tock")
             if str(msg.payload.decode("utf-8")) == "request_session":
                 print("session requested")
-                video.stop_video()
+                #video.stop_video()
                 video.stm.send("request")
+                video.get_motion()
+                
             
-            
+    def get_motion_status(self):
+        if self.motionStatus:
+            return True
+        return False
+    
     def start(self, broker, port):
         print("Connecting to {}:{}".format(broker, port))
         self.client.connect(broker, port)
@@ -264,7 +274,6 @@ class MQTT_client:
     def send(self, message):
         self.client.publish("ttm4115/3/comms/client2", message)
 
-
 broker, port = "mqtt.item.ntnu.no", 1883
 
 video = Video_Session()
@@ -280,6 +289,5 @@ myclient.stm_driver = driver
 
 driver.start()
 myclient.start(broker, port)
-
 
 
