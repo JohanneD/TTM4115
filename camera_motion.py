@@ -92,7 +92,6 @@ class Detector:
             
             if text == "Occupied":
                 print("motion detected!!")
-                self.vs.stream.release()
                 return True
 
             # if the `q` key is pressed, break from the lop
@@ -101,8 +100,7 @@ class Detector:
             
             
         # cleanup the camera and close any open windows
-        self.vs.stream.release()
-        cv2.destroyAllWindows()
+        self.stop_motion()
         
         
     def stop_motion(self):

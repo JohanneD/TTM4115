@@ -5,6 +5,7 @@ import keyboard
 import paho.mqtt.client as mqtt
 import cv2
 import camera_motion as camera
+import googleMeet
 from six.moves import input
 from pynput.keyboard import Key, Controller
 
@@ -37,6 +38,7 @@ class Video_Session:
             if key == ord("y"):
                 myclient.send("request_session")
                 self.stm.send('join')
+                self.motion.stop_motion()
                 break
             elif key == ord("n"):
                 print("No")
@@ -75,19 +77,8 @@ class Video_Session:
     def start_session(self):
         #starte the google meeting
         print("staring session...")
-        
-        cam = cv2.VideoCapture(-1, cv2.CAP_V4L)
-
-        while True:
-            ret, image = cam.read()
-            cv2.imshow('test', image)
-            k=cv2.waitKey(1)
-            if k!= -1:
-                break
-            
-        cv2.imwrite('/home/pi/test.jpg', image)
-        cam.release()
-        cv2.destroyAllWindows()
+        meet_detector = googleMeet.meeting()
+        meet_detector.start()
     
     #call motion_detection when stopping the session. 
     def stop_session(self):
@@ -127,7 +118,7 @@ t1 = {
     "trigger": "detect",
     "source": "idle",
     "target": "motion_detection",
-    "effect": "session_option; start_timer('t', 100)",
+    "effect": "session_option; start_timer('t', 1000)",
 }
 
 t2 = {
