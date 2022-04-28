@@ -23,8 +23,9 @@ class meeting:
         driver.implicitly_wait(10)
      
         # go to google home page
-        driver.get('https://google.com/')
-        driver.implicitly_wait(100)
+        #driver.get('https://google.com/')
+        driver.implicitly_wait(5000)
+        time.sleep(3)
  
  
     def turnOffMicCam(self, driver):
@@ -46,7 +47,7 @@ class meeting:
         print(1)
         time.sleep(5)
         driver.implicitly_wait(2)
-        #driver.find_element_by_xpath("/html/body/div[1]/c-wiz/div/div/div[9]/div[3]/div/div[1]/div[3]/div/div/div[2]/div/div[2]/div/div[1]/div/button").click()
+        driver.find_element_by_xpath("/html/body/div[1]/c-wiz/div/div/div[9]/div[3]/div/div[1]/div[3]/div/div/div[2]/div/div[2]/div/div[1]/div/button").click()
         print(1)
      
      
@@ -63,7 +64,7 @@ class meeting:
     def start(self):
         mail_address = 'officeonettm4115@gmail.com'
         password = 'TTM4115-komsys'
-        meeting_adress = 'https://meet.google.com/sih-bygt-fgv'
+        meeting_adress = 'https://meet.google.com/sih-bygt-fgv?pli=1'
          
         # create chrome instance
         opt = Options()

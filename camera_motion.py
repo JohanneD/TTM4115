@@ -9,7 +9,7 @@ import cv2
 
 class Detector:
     
-    vs = VideoStream(src=0).start()
+    vs = VideoStream(src=2).start()
     args = None
     
     def detect_motion(self):

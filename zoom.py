@@ -22,16 +22,16 @@ def join(meet, password):
     #driver = webdriver.Chrome('C://software/chromedriver.exe')
     driver.get(' https://NTNU.zoom.us/j/94568751227?pwd=c3JmQWxmWjdWQXU2S2J0SDVOWnRYQT09')
     
-    time.sleep(5) #to let the webpage open completely
+    time.sleep(2) #to let the webpage open completely
     driver.find_element_by_xpath("/html/body/div[3]/div[2]/div/div[2]/h3[2]/span/a").click()
     
-    time.sleep(5)
+    time.sleep(2)
     driver.find_element_by_xpath("//*[@id='inputname']").send_keys(name)
  
-    time.sleep(5)
+    time.sleep(2)
     driver.find_element_by_xpath("//*[@id='joinBtn']").click()
     
-    time.sleep(5)
+    time.sleep(2)
     #driver.find_element_by_xpath("//*[@id='inputname']").send_keys(name)
     
     #time.sleep(5)
@@ -57,3 +57,5 @@ def join(meet, password):
     #py.click()
  
 join(meet_code,passcode)
+while True:
+    time.sleep(10)
