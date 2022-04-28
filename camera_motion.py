@@ -9,16 +9,18 @@ import cv2
 
 class Detector:
     
-    vs = VideoStream(src=2).start()
+    vs = None
     args = None
     
     def detect_motion(self):
         # construct the argument parser and parse the arguments
+        self.vs = VideoStream(src=0).start()
         ap = argparse.ArgumentParser()
         ap.add_argument("-v", "--video", help="path to the video file")
         ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
         self.args = vars(ap.parse_args())
-
+        
+    
         # if the video argument is None, then we are reading from webcam
         #if self.args.get("video", None) is None:
         
@@ -104,6 +106,8 @@ class Detector:
         
         
     def stop_motion(self):
-        self.vs.stream.release()
-        cv2.destroyAllWindows()
+        if not self.vs==None:
+            self.vs.stream.release()
+            cv2.destroyAllWindows()
+        
         

@@ -6,7 +6,8 @@ import paho.mqtt.client as mqtt
 import cv2
 import camera_motion as camera
 import googleMeet
-from six.moves import input
+#from six.moves import input
+import time
 from pynput.keyboard import Key, Controller
 
 class Video_Session:
@@ -20,8 +21,10 @@ class Video_Session:
         return self.motion.stop_motion()
     
     def motion_detection(self):
-        
-        detect = self.motion.detect_motion()
+        print("detecting motion...")
+        detect = self.motion
+        detect.stop_motion()
+        detect.detect_motion()
         if detect:
             #self.session_option()
             #self.start_timer(10)
@@ -33,8 +36,11 @@ class Video_Session:
         #cam.release()
         #cv2.destroyAllWindows()
         print("do you want to join session? (Y/N): ")
+        timer = time.perf_counter()
         while True:
             key = cv2.waitKey(1) & 0xFF
+            new_time = time.perf_counter()
+            timediff = new_time - timer
             if key == ord("y"):
                 myclient.send("request_session")
                 self.stm.send('join')
@@ -44,6 +50,10 @@ class Video_Session:
                 print("No")
                 self.stm.send('decline')
                 break
+            elif timediff >= 10:
+                self.stm.send('timeout_motion')
+                #self.motion.stop_motion()
+                break
     """         
     def stop_video(self):
         keyboard = Controller()
@@ -52,18 +62,27 @@ class Video_Session:
     """
    
     def request_wait(self):
-        print("waiting for other party to join")
-        print("join session? (Y/N): ")
+        print("requested by other party")
+        print(1)
+        timer = time.perf_counter()
         while True:
+            new_time = time.perf_counter()
+            timediff = new_time - timer
             try:
-                if keyboard.read_key == 'y':
+                #if keyboard.read_key == 'y':
+                if answer == 'yes':
                     print('accepted')
                     myclient.send("accepted")
                     self.stm.send('accept_request')
            
-                elif keyboard.read_key == 'n':
+                #elif keyboard.read_key == 'n':
+                elif answer == 'no':
                     print("decline")
-                    self.stm.send('decline')
+                    self.stm.send('decline_request')
+                    break
+                elif timediff >= 10:
+                    self.stm.send('timeout_request')
+                    #self.motion.stop_motion()
                     break
             except:
                 break
@@ -118,7 +137,7 @@ t1 = {
     "trigger": "detect",
     "source": "idle",
     "target": "motion_detection",
-    "effect": "session_option; start_timer('t', 1000)",
+    "effect": "session_option",
 }
 
 t2 = {
@@ -132,14 +151,14 @@ t3 = {
     "trigger": "decline",
     "source": "motion_detection",
     "target": "idle",
-    "effect": ""
+    "effect": "motion_detection"
 }
 
 t4 = {
-    "trigger": "t",
+    "trigger": "timeout_motion",
     "source": "motion_detection",
     "target": "idle",
-    "effect": ""
+    "effect": "motion_detection"
 }
 
 t5 = {
@@ -216,7 +235,14 @@ t15 = {
     "trigger": "decline_request",
     "source": "requesting",
     "target": "idle",
-    "effect": "stop_session",
+    "effect": "motion_detection",
+    }
+
+t16 = {
+    "trigger": "timeout_request",
+    "source": "requesting",
+    "target": "idle",
+    "effect": "motion_detection",
     }
 
 class MQTT_client:
@@ -268,7 +294,7 @@ class MQTT_client:
 broker, port = "mqtt.item.ntnu.no", 1883
 
 video = Video_Session()
-video_chat_machine = Machine(transitions=[t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15], obj=video, name="video_chat")
+video_chat_machine = Machine(transitions=[t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16], obj=video, name="video_chat")
 video.stm = video_chat_machine
 
 driver = Driver()

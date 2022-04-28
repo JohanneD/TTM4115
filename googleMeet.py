@@ -25,7 +25,7 @@ class meeting:
         # go to google home page
         #driver.get('https://google.com/')
         driver.implicitly_wait(5000)
-        time.sleep(3)
+        time.sleep(5)
  
  
     def turnOffMicCam(self, driver):
@@ -47,7 +47,7 @@ class meeting:
         print(1)
         time.sleep(5)
         driver.implicitly_wait(2)
-        driver.find_element_by_xpath("/html/body/div[1]/c-wiz/div/div/div[9]/div[3]/div/div[1]/div[3]/div/div/div[2]/div/div[2]/div/div[1]/div/button").click()
+        driver.find_element_by_xpath("//*[@id='yDmH0d']/c-wiz/div/div/div[9]/div[3]/div/div[1]/div[3]/div/div/div[2]/div/div[2]/div/div[1]/div/button/span").click()
         print(1)
      
      
@@ -76,6 +76,7 @@ class meeting:
             "profile.default_content_setting_values.geolocation": 0,
             "profile.default_content_setting_values.notifications": 1
         })
+        opt.add_experimental_option("detach", True)
         driver = webdriver.Chrome(options=opt)
          
         # login to Google account
@@ -91,4 +92,6 @@ class meeting:
             time.sleep(2)
             print(driver.current_url)
             if driver.current_url != meeting_adress:
+                driver.close()
                 driver.quit()
+        
