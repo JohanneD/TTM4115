@@ -17,7 +17,7 @@ class Video_Session:
         print("starting...")
         #motion = motion_detector.Detector()
         
-    def get_motion(self):
+    def stopping_motion(self):
         return self.motion.stop_motion()
     
     def motion_detection(self):
@@ -54,29 +54,23 @@ class Video_Session:
                 self.stm.send('timeout_motion')
                 #self.motion.stop_motion()
                 break
-    """         
-    def stop_video(self):
-        keyboard = Controller()
-        keyboard.press('q')
-        keyboard.release('q')
-    """
+    
    
     def request_wait(self):
         print("requested by other party")
         print(1)
         timer = time.perf_counter()
+        answer = input("join session? ")
         while True:
             new_time = time.perf_counter()
             timediff = new_time - timer
             try:
-                #if keyboard.read_key == 'y':
-                if answer == 'yes':
+                if answer == "yes":
                     print('accepted')
                     myclient.send("accepted")
                     self.stm.send('accept_request')
-           
-                #elif keyboard.read_key == 'n':
-                elif answer == 'no':
+                    break
+                elif answer == "no":
                     print("decline")
                     self.stm.send('decline_request')
                     break
@@ -264,9 +258,9 @@ class MQTT_client:
         #self.stm_driver.send("message", "tick_tock")
             if str(msg.payload.decode("utf-8")) == "request_session":
                 print("session requested")
-                #video.stop_video()
+                video.stopping_motion()
                 video.stm.send("request")
-                video.get_motion()
+                
                 
             
     def get_motion_status(self):
