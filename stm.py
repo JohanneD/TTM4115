@@ -91,7 +91,9 @@ class Video_Session:
         #starte the google meeting
         print("staring session...")
         meet_detector = googleMeet.meeting()
-        meet_detector.start()
+        status = meet_detector.start()
+        if status == "session ended":
+            self.stm.send('exit')
     
     #call motion_detection when stopping the session. 
     def stop_session(self):
@@ -159,7 +161,7 @@ t5 = {
     "trigger": "exit",
     "source": "active",
     "target": "idle",
-    "effect": "stop_session",
+    "effect": "motion_detection",
 }
 
 t6 = {

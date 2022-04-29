@@ -8,7 +8,7 @@ class meeting:
     def Glogin(self, mail_address, password, driver):
         # Login Page
         driver.get(
-            'https://accounts.google.com/ServiceLogin?hl=en&passive=true&continue=https://www.google.com/&ec=GAZAAQ')
+            'https://accounts.google.com/ServiceLogin?continue=https%3A%2F%2Fmeet.google.com%2Fsih-bygt-fgv&sacu=1&hl=en_US&rip=1')
      
         # input Gmail
         driver.find_element_by_id("identifierId").send_keys(mail_address)
@@ -21,6 +21,7 @@ class meeting:
         driver.implicitly_wait(10)
         driver.find_element_by_id("passwordNext").click()
         driver.implicitly_wait(10)
+        time.sleep(5)
      
         # go to google home page
         #driver.get('https://google.com/')
@@ -64,7 +65,7 @@ class meeting:
     def start(self):
         mail_address = 'officeonettm4115@gmail.com'
         password = 'TTM4115-komsys'
-        meeting_adress = 'https://meet.google.com/sih-bygt-fgv?pli=1'
+        meeting_adress = 'https://meet.google.com/sih-bygt-fgv'
          
         # create chrome instance
         opt = Options()
@@ -83,15 +84,21 @@ class meeting:
         self.Glogin(mail_address, password, driver)
          
         # go to google meet
-        driver.get(meeting_adress)
+        #driver.get(meeting_adress)
         #turnOffMicCam()
         # AskToJoin()
         self.joinNow(driver)
+        
+        time.sleep(5)
 
         while True:
             time.sleep(2)
             print(driver.current_url)
             if driver.current_url != meeting_adress:
+                print(2)
                 driver.close()
                 driver.quit()
+                break
+            
+        return "session ended"
         
