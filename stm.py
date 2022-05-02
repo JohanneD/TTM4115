@@ -4,11 +4,11 @@ from threading import Thread
 import keyboard
 import paho.mqtt.client as mqtt
 import cv2
-import camera_motion as camera
+import camera_motion_max as camera
 import googleMeet
 #from six.moves import input
 import time
-from pynput.keyboard import Key, Controller
+#from pynput.keyboard import Key, Controller
 
 class Video_Session:
     motion = camera.Detector()
@@ -91,9 +91,18 @@ class Video_Session:
         #starte the google meeting
         print("staring session...")
         meet_detector = googleMeet.meeting()
-        status = meet_detector.start()
-        if status == "session ended":
-            self.stm.send('exit')
+        meet_detector.start()
+        while True:
+            answer = input("Options for the session: 1: start game  2: close session ")
+            if answer == "2":
+                meet_detector.endMeeting()
+                self.stm.send("exit")
+                break
+            if answer == "1":
+                print("Starting game")
+                self.stm.send("play")
+                #self.start_game()
+            print("Invalid answer, try again!")
     
     #call motion_detection when stopping the session. 
     def stop_session(self):
@@ -107,10 +116,12 @@ class Video_Session:
     #if yes from both users then call the start game option
     def start_game(self):
         print("you are playing cool game :O")
+        myclient.send("game started")
         
     def stop_game(self):
         #stops the game
         print("stoping game...")
+        myclient.send("game stopped")
     
     #do not need to diplay a actual leaderboard if we do not have time to implement it.
     def display(self):
@@ -236,7 +247,7 @@ t15 = {
 
 t16 = {
     "trigger": "timeout_request",
-    "source": "requesting",
+    "source": "requestig",
     "target": "idle",
     "effect": "motion_detection",
     }

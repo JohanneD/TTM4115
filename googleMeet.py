@@ -5,54 +5,56 @@ from selenium.webdriver.common.by import By
 import time
  
 class meeting:
-    def Glogin(self, mail_address, password, driver):
+
+    driver = None 
+
+    def Glogin(self, mail_address, password):
         # Login Page
-        driver.get(
+        self.driver.get(
             'https://accounts.google.com/ServiceLogin?continue=https%3A%2F%2Fmeet.google.com%2Fsih-bygt-fgv&sacu=1&hl=en_US&rip=1')
      
         # input Gmail
-        driver.find_element_by_id("identifierId").send_keys(mail_address)
-        driver.find_element_by_id("identifierNext").click()
-        driver.implicitly_wait(10)
+        self.driver.find_element_by_id("identifierId").send_keys(mail_address)
+        self.driver.find_element_by_id("identifierNext").click()
+        self.driver.implicitly_wait(10)
      
         # input Password
-        driver.find_element_by_xpath(
+        self.driver.find_element_by_xpath(
             '//*[@id="password"]/div[1]/div/div[1]/input').send_keys(password)
-        driver.implicitly_wait(10)
-        driver.find_element_by_id("passwordNext").click()
-        driver.implicitly_wait(10)
+        self.driver.implicitly_wait(10)
+        self.driver.find_element_by_id("passwordNext").click()
+        self.driver.implicitly_wait(10)
         time.sleep(5)
      
         # go to google home page
         #driver.get('https://google.com/')
-        driver.implicitly_wait(5000)
+        self.driver.implicitly_wait(5000)
         time.sleep(5)
  
  
-    def turnOffMicCam(self, driver):
+    def turnOffMicCam(self):
         # turn off Microphone
         time.sleep(2)
-        driver.find_element_by_xpath(
+        self.driver.find_element_by_xpath(
             '//*[@id="yDmH0d"]/div/div/c-wiz/div/div/div[8]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]/div/div[4]/div[1]/div/div/div').click()
-        driver.implicitly_wait(3000)
+        self.driver.implicitly_wait(3000)
      
         # turn off camera
         time.sleep(1)
-        driver.find_element_by_xpath(
+        self.driver.find_element_by_xpath(
             '//*[@id="yDmH0d"]/div/div/c-wiz/div/div/div[8]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]/div/div[4]/div[2]/div/div').click()
-        driver.implicitly_wait(3000)
+        self.driver.implicitly_wait(3000)
      
      
-    def joinNow(self, driver):
+    def joinNow(self):
         # Join meet
         print(1)
-        time.sleep(5)
-        driver.implicitly_wait(2)
-        driver.find_element_by_xpath("//*[@id='yDmH0d']/c-wiz/div/div/div[9]/div[3]/div/div[1]/div[3]/div/div/div[2]/div/div[2]/div/div[1]/div/button/span").click()
+        self.driver.implicitly_wait(2)
+        self.driver.find_element_by_xpath("//*[@id='yDmH0d']/c-wiz/div/div/div[9]/div[3]/div/div[1]/div[3]/div/div/div[2]/div/div[2]/div/div[1]/div/button/span").click()
         print(1)
      
      
-    def AskToJoin(self, driver):
+    def AskToJoin(self):
         # Ask to Join meet
         time.sleep(5)
         driver.implicitly_wait(2000)
@@ -78,27 +80,21 @@ class meeting:
             "profile.default_content_setting_values.notifications": 1
         })
         opt.add_experimental_option("detach", True)
-        driver = webdriver.Chrome(options=opt)
+        self.driver = webdriver.Chrome(options=opt)
          
         # login to Google account
-        self.Glogin(mail_address, password, driver)
+        self.Glogin(mail_address, password)
          
         # go to google meet
         #driver.get(meeting_adress)
         #turnOffMicCam()
         # AskToJoin()
-        self.joinNow(driver)
+        self.joinNow()
         
         time.sleep(5)
 
-        while True:
-            time.sleep(2)
-            print(driver.current_url)
-            if driver.current_url != meeting_adress:
-                print(2)
-                driver.close()
-                driver.quit()
-                break
-            
-        return "session ended"
+    def endMeeting(self):
+        self.driver.close()
+        self.driver.quit()
+        
         
