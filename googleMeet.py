@@ -49,7 +49,7 @@ class meeting:
     def joinNow(self):
         # Join meet
         print(1)
-        self.driver.implicitly_wait(2)
+        self.driver.implicitly_wait(1)
         self.driver.find_element_by_xpath("//*[@id='yDmH0d']/c-wiz/div/div/div[9]/div[3]/div/div[1]/div[3]/div/div/div[2]/div/div[2]/div/div[1]/div/button/span").click()
         print(1)
      
@@ -96,5 +96,14 @@ class meeting:
     def endMeeting(self):
         self.driver.close()
         self.driver.quit()
-        
+    
+    def openUI(self):
+        self.driver.execute_script('''window.open("https://ttm4115-guiv2.herokuapp.com/index.html#/","_blank");''')
+
+    def closeUI(self):
+        window_name = self.driver.window_handles[1]
+        self.driver.switch_to.window(window_name)
+        self.driver.close()
+        window_name = self.driver.window_handles[0]
+        self.driver.switch_to.window(window_name)
         

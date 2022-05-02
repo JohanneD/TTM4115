@@ -12,6 +12,7 @@ import time
 
 class Video_Session:
     motion = camera.Detector()
+    meet_detector = None
     
     def on_init(self):
         print("starting...")
@@ -80,30 +81,43 @@ class Video_Session:
                     break
             except:
                 break
-                
-    #def start_timer(self, t):
-        #starts timer
-        #print("start timer")
         
         
     #if yes on session_option then call start_session  
     def start_session(self):
         #starte the google meeting
         print("staring session...")
-        meet_detector = googleMeet.meeting()
-        meet_detector.start()
-        while True:
-            answer = input("Options for the session: 1: start game  2: close session ")
-            if answer == "2":
-                meet_detector.endMeeting()
-                self.stm.send("exit")
-                break
-            if answer == "1":
-                print("Starting game")
-                self.stm.send("play")
-                #self.start_game()
-            print("Invalid answer, try again!")
+        self.meet_detector = googleMeet.meeting()
+        self.meet_detector.start()
+        self.options_for_call()
+        
     
+    def options_for_call(self):
+        answer = input("Options for the session: 1: start game  2: close session ")
+        if answer == "2":
+            self.meet_detector.endMeeting()
+            self.stm.send("exit")
+        elif answer == "1":
+            print("Starting game")
+            self.stm.send("play")
+            #self.start_game()
+        elif answer.upper() == "Y":
+            self.stm.send("accept_game")
+        elif answer.upper() == "N":
+            self.stm.send("decline_game")
+        else:
+            print("Invalid answer, try again!")
+            self.options_for_call()
+
+    def options_for_game(self):
+        answer = input("If you want to end the game type exit: ")
+        if answer == "exit":
+            self.stm.send("stop")
+        else:
+            print("Invalid answer, try again!")
+            self.options_for_call()
+
+
     #call motion_detection when stopping the session. 
     def stop_session(self):
         #stops the video stream
@@ -111,146 +125,99 @@ class Video_Session:
     
     def request_user(self):
         #ask if user wants to play game, need both parties to accept the game request.
-        print("check if user want ot play game")
+        print("check if user want or play game")
     
     #if yes from both users then call the start game option
     def start_game(self):
         print("you are playing cool game :O")
-        myclient.send("game started")
+        myclient.send("game_started")
+        self.meet_detector.openUI()
+        self.options_for_game()
         
     def stop_game(self):
         #stops the game
-        print("stoping game...")
-        myclient.send("game stopped")
-    
-    #do not need to diplay a actual leaderboard if we do not have time to implement it.
-    def display(self):
-        #displays the leaderboard on screen
-        print("displaying..")
-        
-    def close_leaderboard(self):
-        #close the leaderboard
-        print("closing leaderboard")
-        
+        print("stopping game...")
+        myclient.send("game_stopped")
+        self.meet_detector.closeUI()
+        self.options_for_call()
+
+    def game_option(self):
+        answer = input("you are requested to join a game. Do you want to join? (Y/N) ")
+        if answer.upper() == "Y":
+            self.stm.send("accept_game")
+        elif answer.upper() == "N":
+            self.stm.send("decline_game")
 
 
 # initial transition
 t0 = {"source": "initial",
-      "target": "idle",
+      "target": "detecting",
       "effect": "on_init; motion_detection"}
 
 #The session_option function ask the user if it wants to join a session
 t1 = {
     "trigger": "detect",
-    "source": "idle",
-    "target": "motion_detection",
+    "source": "detecting",
+    "target": "wait_video",
     "effect": "session_option",
 }
 
 t2 = {
     "trigger": "join",
-    "source": "motion_detection",
-    "target": "active",
+    "source": "wait_video",
+    "target": "session",
     "effect": "start_session",
 }
 
 t3 = {
     "trigger": "decline",
-    "source": "motion_detection",
-    "target": "idle",
+    "source": "wait_video",
+    "target": "detecting",
     "effect": "motion_detection"
 }
 
 t4 = {
-    "trigger": "timeout_motion",
-    "source": "motion_detection",
-    "target": "idle",
-    "effect": "motion_detection"
-}
-
-t5 = {
     "trigger": "exit",
-    "source": "active",
-    "target": "idle",
+    "source": "session",
+    "target": "detecting",
     "effect": "motion_detection",
 }
 
-t6 = {
-    "trigger": "view",
-    "source": "actve",
-    "target": "leaderboard",
-    "effect": "display",
-}
-
-t7 = {
-    "trigger": "back_button",
-    "source": "leaderboard",
-    "target": "active",
-    "effect": "close_leaderboard",
-}
-
-t8 = {
+t5 = {
     "trigger": "play",
-    "source": "active",
-    "target": "wait",
-    "effect": "request_user",
-}
-
-t9 = {
-    "trigger": "reject",
-    "source": "wait",
-    "target": "active",
-    "effect": "",
-}
-
-t10 = {
-    "trigger": "accepted",
-    "source": "wait",
+    "source": "session",
     "target": "game",
     "effect": "start_game",
 }
 
-t11 = {
+t6 = {
     "trigger": "stop",
     "source": "game",
-    "target": "active",
+    "target": "session",
     "effect": "stop_game",
 }
 
-t12 = {
-    "trigger": "view",
-    "source": "game",
-    "target": "leaderboard",
-    "effect": "display",
+t7 = {
+    "trigger": "request_game",
+    "source": "session",
+    "target": "game_waiting",
+    "effect": "",
 }
 
-t13 = {
-    "trigger": "request",
-    "source": "idle",
-    "target": "requesting",
-    "effect": "request_wait",
+t8 = {
+    "trigger": "accept_game",
+    "source": "game_waiting",
+    "target": "game",
+    "effect": "start_game",
 }
 
-t14 = {
-    "trigger": "accept_request",
-    "source": "requesting",
-    "target": "active",
-    "effect": "start_session",
-    }
+t9 = {
+    "trigger": "decline_game",
+    "source": "game_waiting",
+    "target": "session",
+    "effect": "decline_game_request",
+}
 
-t15 = {
-    "trigger": "decline_request",
-    "source": "requesting",
-    "target": "idle",
-    "effect": "motion_detection",
-    }
-
-t16 = {
-    "trigger": "timeout_request",
-    "source": "requestig",
-    "target": "idle",
-    "effect": "motion_detection",
-    }
 
 class MQTT_client:
     motionStatus = True
@@ -273,6 +240,11 @@ class MQTT_client:
                 print("session requested")
                 video.stopping_motion()
                 video.stm.send("request")
+            if str(msg.payload.decode("utf-8")) == "game_started":
+                print('you are requested to join a game. Do you want to join? (Y/N) ')
+                video.stm.send("request_game")
+            if str(msg.payload.decode("utf-8")) == "game_stopped":
+                print('Other Office stopped the game')
                 
                 
             
@@ -301,7 +273,7 @@ class MQTT_client:
 broker, port = "mqtt.item.ntnu.no", 1883
 
 video = Video_Session()
-video_chat_machine = Machine(transitions=[t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16], obj=video, name="video_chat")
+video_chat_machine = Machine(transitions=[t0, t1, t2, t3, t4, t5, t6, t7, t8, t9], obj=video, name="video_chat")
 video.stm = video_chat_machine
 
 driver = Driver()
