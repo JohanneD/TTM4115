@@ -1,10 +1,10 @@
 from stmpy import Driver, Machine
 from threading import Thread
 
-import keyboard
+#import keyboard
 import paho.mqtt.client as mqtt
 import cv2
-import camera_motion_max as camera
+import camera_motion as camera
 import googleMeet
 #from six.moves import input
 import time
@@ -52,7 +52,7 @@ class Video_Session:
                 self.stm.send('decline')
                 break
             elif timediff >= 10:
-                self.stm.send('timeout_motion')
+                self.stm.send('decline')
                 #self.motion.stop_motion()
                 break
     
@@ -61,22 +61,22 @@ class Video_Session:
         print("requested by other party")
         print(1)
         timer = time.perf_counter()
-        answer = input("join session? ")
+        answer = input("join session? (y/n) ") 
         while True:
             new_time = time.perf_counter()
             timediff = new_time - timer
             try:
-                if answer == "yes":
+                if answer.lower() == "y":
                     print('accepted')
                     myclient.send("accepted")
                     self.stm.send('accept_request')
                     break
-                elif answer == "no":
+                elif answer.lower() == "n":
                     print("decline")
                     self.stm.send('decline_request')
                     break
                 elif timediff >= 10:
-                    self.stm.send('timeout_request')
+                    self.stm.send('decline_request')
                     #self.motion.stop_motion()
                     break
             except:
@@ -99,6 +99,7 @@ class Video_Session:
             self.stm.send("exit")
         elif answer == "1":
             print("Starting game")
+            myclient.send("game_started")
             self.stm.send("play")
             #self.start_game()
         elif answer.upper() == "Y":
@@ -130,7 +131,6 @@ class Video_Session:
     #if yes from both users then call the start game option
     def start_game(self):
         print("you are playing cool game :O")
-        myclient.send("game_started")
         self.meet_detector.openUI()
         self.options_for_game()
         
@@ -218,6 +218,27 @@ t9 = {
     "effect": "decline_game_request",
 }
 
+t10 = {
+    "trigger": "request",
+    "source": "detecting",
+    "target": "requesting",
+    "effect": "request_wait",
+}
+
+t11 = {
+    "trigger": "accept_request",
+    "source": "requesting",
+    "target": "session",
+    "effect": "start_session",
+}
+
+t12 = {
+    "trigger": "decline_request",
+    "source": "requesting",
+    "target": "detecting",
+    "effect": "motion_detection",
+}
+
 
 class MQTT_client:
     motionStatus = True
@@ -232,7 +253,7 @@ class MQTT_client:
         print("on_connect(): {}".format(mqtt.connack_string(rc)))
 
     def on_message(self, client, userdata, msg):
-        if msg.topic == "ttm4115/3/comms/client1":
+        if msg.topic == "ttm4115/3/comms/client2":
             print(f"on_message(): topic: {msg.topic}:{str(msg.payload)}")
         
         #self.stm_driver.send("message", "tick_tock")
@@ -257,7 +278,7 @@ class MQTT_client:
         print("Connecting to {}:{}".format(broker, port))
         self.client.connect(broker, port)
 
-        self.client.subscribe("ttm4115/3/comms/client1")
+        self.client.subscribe("ttm4115/3/comms/client2")
 
         try:
             # line below should not have the () after the function!
@@ -268,12 +289,12 @@ class MQTT_client:
             self.client.disconnect()
             
     def send(self, message):
-        self.client.publish("ttm4115/3/comms/client2", message)
+        self.client.publish("ttm4115/3/comms/client1", message)
 
 broker, port = "mqtt.item.ntnu.no", 1883
 
 video = Video_Session()
-video_chat_machine = Machine(transitions=[t0, t1, t2, t3, t4, t5, t6, t7, t8, t9], obj=video, name="video_chat")
+video_chat_machine = Machine(transitions=[t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12], obj=video, name="video_chat")
 video.stm = video_chat_machine
 
 driver = Driver()
