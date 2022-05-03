@@ -27,40 +27,15 @@ class meeting:
         time.sleep(5)
      
         # go to google home page
-        #driver.get('https://google.com/')
         self.driver.implicitly_wait(5000)
         time.sleep(5)
- 
- 
-    def turnOffMicCam(self):
-        # turn off Microphone
-        time.sleep(2)
-        self.driver.find_element_by_xpath(
-            '//*[@id="yDmH0d"]/div/div/c-wiz/div/div/div[8]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]/div/div[4]/div[1]/div/div/div').click()
-        self.driver.implicitly_wait(3000)
-     
-        # turn off camera
-        time.sleep(1)
-        self.driver.find_element_by_xpath(
-            '//*[@id="yDmH0d"]/div/div/c-wiz/div/div/div[8]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]/div/div[4]/div[2]/div/div').click()
-        self.driver.implicitly_wait(3000)
      
      
     def joinNow(self):
         # Join meet
-        print(1)
         self.driver.implicitly_wait(1)
         self.driver.find_element_by_xpath("//*[@id='yDmH0d']/c-wiz/div/div/div[9]/div[3]/div/div[1]/div[3]/div/div/div[2]/div/div[2]/div/div[1]/div/button/span").click()
-        print(1)
      
-     
-    def AskToJoin(self):
-        # Ask to Join meet
-        time.sleep(5)
-        driver.implicitly_wait(2000)
-        driver.find_element_by_css_selector(
-            'div.uArJ5e.UQuaGc.Y5sE8d.uyXBBb.xKiqt').click()
-        # Ask to join and join now buttons have same xpaths
      
      
     # assign email id and password
@@ -86,21 +61,21 @@ class meeting:
         self.Glogin(mail_address, password)
          
         # go to google meet
-        #driver.get(meeting_adress)
-        #turnOffMicCam()
-        # AskToJoin()
         self.joinNow()
         
         time.sleep(5)
 
     def endMeeting(self):
+        #end meet, closes the browser
         self.driver.close()
         self.driver.quit()
     
     def openUI(self):
+        #Open a new tab with the quiz and leaderboard
         self.driver.execute_script('''window.open("https://ttm4115-guiv2.herokuapp.com/index.html#/","_blank");''')
 
     def closeUI(self):
+        #closes only the tab with the quiz
         window_name = self.driver.window_handles[1]
         self.driver.switch_to.window(window_name)
         self.driver.close()

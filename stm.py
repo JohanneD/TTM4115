@@ -27,17 +27,15 @@ class Video_Session:
         detect.stop_motion()
         detect.detect_motion()
         if detect:
-            #self.session_option()
-            #self.start_timer(10)
             self.stm.send('detect')
     
-    #both session option and start timer is called when motion is detected.
+    
     def session_option(self):
-        #request participation from both users, might need to change this to accepting only one user and not needing both users
-        #cam.release()
-        #cv2.destroyAllWindows()
-        print("do you want to join session? (Y/N): ")
+        print("Do you want to join session? (Y/N): ")
+        
+        #the built in timer mentioned in the state machine, on timeout decline is triggered
         timer = time.perf_counter()
+        
         while True:
             key = cv2.waitKey(1) & 0xFF
             new_time = time.perf_counter()
@@ -53,15 +51,14 @@ class Video_Session:
                 break
             elif timediff >= 10:
                 self.stm.send('decline')
-                #self.motion.stop_motion()
                 break
     
    
     def request_wait(self):
-        print("requested by other party")
-        print(1)
+        #built in timer, same as session_option()
         timer = time.perf_counter()
-        answer = input("join session? (y/n) ") 
+        
+        answer = input("You are requested by other office to join call. Do you want to join? (y/n) ") 
         while True:
             new_time = time.perf_counter()
             timediff = new_time - timer
@@ -77,15 +74,13 @@ class Video_Session:
                     break
                 elif timediff >= 10:
                     self.stm.send('decline_request')
-                    #self.motion.stop_motion()
                     break
             except:
                 break
         
-        
-    #if yes on session_option then call start_session  
+         
     def start_session(self):
-        #starte the google meeting
+        #starts the google meeting
         print("staring session...")
         self.meet_detector = googleMeet.meeting()
         self.meet_detector.start()
@@ -93,6 +88,7 @@ class Video_Session:
         
     
     def options_for_call(self):
+        #get input from user in the terminal
         answer = input("Options for the session: 1: start game  2: close session ")
         if answer == "2":
             self.meet_detector.endMeeting()
@@ -101,7 +97,11 @@ class Video_Session:
             print("Starting game")
             myclient.send("game_started")
             self.stm.send("play")
-            #self.start_game()
+            
+        
+        #Since the input function in the option_for_call blocks the new input function in game_option when we are invited to join a game,
+        #the below code is a hacky way to get around the input blocking
+        #this is not an optimal way to solve this, because if we write a wrong input the option_for_call is called again...
         elif answer.upper() == "Y":
             self.stm.send("accept_game")
         elif answer.upper() == "N":
@@ -118,24 +118,14 @@ class Video_Session:
             print("Invalid answer, try again!")
             self.options_for_call()
 
-
-    #call motion_detection when stopping the session. 
-    def stop_session(self):
-        #stops the video stream
-        print("stop video")
     
-    def request_user(self):
-        #ask if user wants to play game, need both parties to accept the game request.
-        print("check if user want or play game")
-    
-    #if yes from both users then call the start game option
     def start_game(self):
         print("you are playing cool game :O")
         self.meet_detector.openUI()
         self.options_for_game()
         
     def stop_game(self):
-        #stops the game
+        #stops the game for current office, and notifies the other office
         print("stopping game...")
         myclient.send("game_stopped")
         self.meet_detector.closeUI()
@@ -154,7 +144,6 @@ t0 = {"source": "initial",
       "target": "detecting",
       "effect": "on_init; motion_detection"}
 
-#The session_option function ask the user if it wants to join a session
 t1 = {
     "trigger": "detect",
     "source": "detecting",
@@ -253,26 +242,16 @@ class MQTT_client:
         print("on_connect(): {}".format(mqtt.connack_string(rc)))
 
     def on_message(self, client, userdata, msg):
-        if msg.topic == "ttm4115/3/comms/client2":
-            print(f"on_message(): topic: {msg.topic}:{str(msg.payload)}")
         
-        #self.stm_driver.send("message", "tick_tock")
             if str(msg.payload.decode("utf-8")) == "request_session":
-                print("session requested")
                 video.stopping_motion()
                 video.stm.send("request")
             if str(msg.payload.decode("utf-8")) == "game_started":
-                print('you are requested to join a game. Do you want to join? (Y/N) ')
+                print('\nYou are requested to join a game. Do you want to join? (Y/N) ')
                 video.stm.send("request_game")
             if str(msg.payload.decode("utf-8")) == "game_stopped":
                 print('Other Office stopped the game')
                 
-                
-            
-    def get_motion_status(self):
-        if self.motionStatus:
-            return True
-        return False
     
     def start(self, broker, port):
         print("Connecting to {}:{}".format(broker, port))
@@ -281,7 +260,6 @@ class MQTT_client:
         self.client.subscribe("ttm4115/3/comms/client2")
 
         try:
-            # line below should not have the () after the function!
             thread = Thread(target=self.client.loop_forever)
             thread.start()
         except KeyboardInterrupt:

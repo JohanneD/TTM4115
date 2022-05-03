@@ -13,22 +13,18 @@ class Detector:
     args = None
     
     def detect_motion(self):
-        # construct the argument parser and parse the arguments
+        
+        #reading from webcam
         self.vs = VideoStream(src=0).start()
+        
+        # construct the argument parser and parse the arguments
         ap = argparse.ArgumentParser()
         ap.add_argument("-v", "--video", help="path to the video file")
         ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
         self.args = vars(ap.parse_args())
         
-    
-        # if the video argument is None, then we are reading from webcam
-        #if self.args.get("video", None) is None:
         
         time.sleep(2.0)
-
-        # otherwise, we are reading from a video file
-        #else:
-            #self.vs = cv2.VideoCapture(args["video"])
             
         # initialize the first frame in the video stream
         firstFrame = None
@@ -88,10 +84,9 @@ class Detector:
 
             # show the frame and record if the user presses a key
             cv2.imshow("Security Feed", frame)
-            #cv2.imshow("Thresh", thresh)
-            #cv2.imshow("Frame Delta", frameDelta)
             key = cv2.waitKey(1) & 0xFF
             
+            #check if motion is detected
             if text == "Occupied":
                 print("motion detected!!")
                 return True
@@ -99,7 +94,6 @@ class Detector:
             # if the `q` key is pressed, break from the lop
             if key == ord("q"):
                 break
-            
             
         # cleanup the camera and close any open windows
         self.stop_motion()
