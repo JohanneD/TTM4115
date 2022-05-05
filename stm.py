@@ -1,14 +1,11 @@
 from stmpy import Driver, Machine
 from threading import Thread
 
-#import keyboard
 import paho.mqtt.client as mqtt
 import cv2
 import camera_motion as camera
 import googleMeet
-#from six.moves import input
 import time
-#from pynput.keyboard import Key, Controller
 
 class Video_Session:
     motion = camera.Detector()
