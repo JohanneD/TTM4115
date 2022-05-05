@@ -10,5 +10,5 @@ sudo apt install chromium-chromedriver
 ## Running
 You need a Webcam connected on /dev/video0 and then you can run
 <code>
-  python stm.py
+  python stmX.py
 </code>
